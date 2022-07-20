@@ -7,6 +7,8 @@ This Plugin is to integrate ePayment gateway with Chargily easily.
 - Currently support payment by **CIB / EDAHABIA** cards and soon by **Visa / Mastercard** 
 - This repo is recently created for **Java Library**, If you are a developer and want to collaborate to the development of this library, you are welcomed!
 
+# Instaltation:
+*Soon*
 # Example Usage
 ```java
 import chargily.epay.java.*;
