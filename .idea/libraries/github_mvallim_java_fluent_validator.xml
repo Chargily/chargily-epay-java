@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="github.mvallim.java.fluent.validator" type="repository">
+    <properties maven-id="com.github.mvallim:java-fluent-validator:1.10.0" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/mvallim/java-fluent-validator/1.10.0/java-fluent-validator-1.10.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/aspectj/aspectjrt/1.9.6/aspectjrt-1.9.6.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/aspectj/aspectjweaver/1.9.6/aspectjweaver-1.9.6.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
