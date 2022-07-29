@@ -18,12 +18,10 @@ repositories {
     mavenLocal()
     maven { url 'https://jitpack.io' }
 }
-group = 'com.github.chargily'
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId = 'com.github.chargily'
+            groupId = 'com.github.rainxh11'
             artifactId = 'chargily.epay.java'
             version = '1.0-SNAPSHOT'
 
@@ -52,4 +50,10 @@ dependencies {
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(16)
+    }
 }
