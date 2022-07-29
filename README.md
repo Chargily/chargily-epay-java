@@ -8,7 +8,17 @@ This Plugin is to integrate ePayment gateway with Chargily easily.
 - This repo is recently created for **Java Library**, If you are a developer and want to collaborate to the development of this library, you are welcomed!
 
 # Instaltation:
-*Soon*
+[![](https://jitpack.io/v/chargily/chargily-epay-java.svg)](https://jitpack.io/#chargily/chargily-epay-java)
+To install add Jitpack Repository & chargily package dependency to `build.gradle` gradle build file:
+```java
+repositories {
+    ...
+    maven { url 'https://jitpack.io' }
+}
+dependencies {
+    implementation 'com.github.chargily:chargily-epay-java:1.0'
+}
+```
 # Example Usage
 ```java
 import chargily.epay.java.*;
