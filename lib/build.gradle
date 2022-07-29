@@ -5,15 +5,28 @@
  * For more details take a look at the 'Building Java & JVM projects' chapter in the Gradle
  * User Manual available at https://docs.gradle.org/7.5/userguide/building_java_projects.html
  */
-
 plugins {
     // Apply the java-library plugin for API and implementation separation.
     id 'java-library'
+    id 'maven-publish'
 }
 
 repositories {
-    // Use Maven Central for resolving dependencies.
     mavenCentral()
+    mavenLocal()
+    maven { url 'https://jitpack.io' }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = 'chargily'
+            artifactId = 'chargily.epay.java'
+            version = '1.0-SNAPSHOT'
+
+            from components.java
+        }
+    }
 }
 
 dependencies {
@@ -25,8 +38,6 @@ dependencies {
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'com.google.guava:guava:31.0.1-jre'
-    // https://mvnrepository.com/artifact/com.linecorp.armeria/armeria-retrofit2
-    // https://mvnrepository.com/artifact/com.github.mvallim/java-fluent-validator
     implementation 'com.github.mvallim:java-fluent-validator:1.10.0'
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
