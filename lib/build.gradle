@@ -32,7 +32,6 @@ publishing {
 
 dependencies {
     // Use JUnit Jupiter for testing.
-    //implementation 'com.google.chargily:chargily.epay.java:1.0-SNAPSHOT'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
 
     // This dependency is exported to consumers, that is to say found on their compile classpath.
