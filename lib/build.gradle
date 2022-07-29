@@ -5,8 +5,10 @@
  * For more details take a look at the 'Building Java & JVM projects' chapter in the Gradle
  * User Manual available at https://docs.gradle.org/7.5/userguide/building_java_projects.html
  */
+
 plugins {
     // Apply the java-library plugin for API and implementation separation.
+    id 'java'
     id 'java-library'
     id 'maven-publish'
 }
@@ -16,11 +18,12 @@ repositories {
     mavenLocal()
     maven { url 'https://jitpack.io' }
 }
+group = 'com.github.chargily'
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId = 'chargily'
+            groupId = 'com.github.chargily'
             artifactId = 'chargily.epay.java'
             version = '1.0-SNAPSHOT'
 
@@ -31,6 +34,7 @@ publishing {
 
 dependencies {
     // Use JUnit Jupiter for testing.
+    //implementation 'com.google.chargily:chargily.epay.java:1.0-SNAPSHOT'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
 
     // This dependency is exported to consumers, that is to say found on their compile classpath.
