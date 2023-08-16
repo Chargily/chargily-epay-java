@@ -10,9 +10,8 @@ This Plugin is to integrate ePayment gateway with Chargily easily.
 # Instaltation:
 [![](https://jitpack.io/v/chargily/chargily-epay-java.svg)](https://jitpack.io/#chargily/chargily-epay-java)
 To install add Jitpack Repository & chargily package dependency to `build.gradle` gradle build file:
-```java
+```groovy
 repositories {
-    ...
     maven { url 'https://jitpack.io' }
 }
 dependencies {
@@ -20,6 +19,8 @@ dependencies {
 }
 ```
 # Example Usage
+
+## Sync
 ```java
 import chargily.epay.java.*;
 
@@ -41,6 +42,42 @@ class ChargilyApp {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+}
+```
+
+## Async
+```java
+import chargily.epay.java.*;
+
+class ChargilyApp {
+    public static void main() {
+
+        ChargilyClient client = new ChargilyClient("[API_KEY]");
+        Invoice invoice = new Invoice(
+                "Chakhoum Ahmed",
+                "rainxh11@gmail.com",
+                5.0,
+                "https://backend.com/webhook_endpoint",
+                "https://frontend.com",
+                PaymentMethod.EDAHABIA,
+                "5001",
+                10000.0);
+
+        Callback<ChargilyResponse> responseCallback = new Callback<>() {
+
+            @Override
+            public void onResponse(@Nonnull Call call, Response response) {
+                // do something on response
+            }
+
+            @Override
+            public void onFailure(@Nonnull Call call, @Nonnull Throwable t) {
+                // do something on failure
+            }
+        };
+
+        client.createInvoiceAsync(invoice, responseCallback);
     }
 }
 ```
