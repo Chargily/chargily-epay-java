@@ -3,6 +3,10 @@ package chargily.epay.java;
 import com.google.gson.annotations.SerializedName;
 
 public class ChargilyResponse {
+
+    @SerializedName("checkout_url")
+    public String checkoutUrl;
+
     public String getCheckoutUrl() {
         return checkoutUrl;
     }
@@ -10,7 +14,4 @@ public class ChargilyResponse {
     public void setCheckoutUrl(String checkoutUrl) {
         this.checkoutUrl = checkoutUrl;
     }
-
-    @SerializedName("checkout_url")
-    public String checkoutUrl;
 }
