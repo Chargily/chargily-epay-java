@@ -1,11 +1,11 @@
-package chargily.epay.java;
+package chargily.epay.java.exception;
 
 import br.com.fluentvalidator.context.ValidationResult;
 import br.com.fluentvalidator.exception.ValidationException;
 
 public class InvoiceException extends ValidationException {
 
-    protected InvoiceException(ValidationResult validationResult)
+    public InvoiceException(ValidationResult validationResult)
     {
         super(validationResult);
     }

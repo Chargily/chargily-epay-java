@@ -1,6 +1,7 @@
 package chargily.epay.java;
 
 import br.com.fluentvalidator.exception.ValidationException;
+import chargily.epay.java.exception.ChargilyApiException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import retrofit2.Call;
@@ -34,13 +35,11 @@ class ChargilyClientTest {
         Invoice invoice = getInvoice();
 
         // When
-        Response<ChargilyResponse> response = chargilyClient.createInvoice(invoice);
+        ChargilyResponse chargilyResponse = chargilyClient.submitInvoice(invoice);
 
         // Then
-        assertThat(response).isNotNull();
-        assertThat(response.body()).isNotNull();
-        assertThat(response.code()).isEqualTo(HTTP_STATUS_CREATED);
-        assertThat(response.body().getCheckoutUrl()).contains(CHARGILY_CHECKOUT_URL);
+        assertThat(chargilyResponse).isNotNull();
+        assertThat(chargilyResponse.getCheckoutUrl()).contains(CHARGILY_CHECKOUT_URL);
     }
 
     @Test
@@ -51,9 +50,20 @@ class ChargilyClientTest {
 
         // When, Then
         assertThatExceptionOfType(ValidationException.class)
-                .isThrownBy(() -> chargilyClient.createInvoice(invoice))
+                .isThrownBy(() -> chargilyClient.submitInvoice(invoice))
                 .withMessageContaining("client name cannot be null or empty");
 
+    }
+
+    @Test
+    void should_throw_chargily_api_exception_when_secret_not_valid() {
+        // Given
+        Invoice invoice = getInvoice();
+        ChargilyClient fakeChargilyClient = new ChargilyClient("api_KFWtdBczv0qnAMHNxGXCGVK93yEAahZwr4EgFa4xmfnLTIJkezPvW0LgqholrC7S");
+        // When, Then
+        assertThatExceptionOfType(ChargilyApiException.class)
+                .isThrownBy(() -> fakeChargilyClient.submitInvoice(invoice))
+                .withMessageContaining("Chargily API call failed with error code");
     }
 
     @Test
