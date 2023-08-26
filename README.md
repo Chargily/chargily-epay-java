@@ -15,7 +15,7 @@ repositories {
     maven { url 'https://jitpack.io' }
 }
 dependencies {
-    implementation 'com.github.chargily:chargily-epay-java:1.0'
+    implementation 'com.github.chargily:chargily-epay-java:1.1'
 }
 ```
 # Example Usage
@@ -37,8 +37,14 @@ class ChargilyApp {
                 "5001",
                 10000.0);
         try {
-            var response = client.createInvoice(invoice);
-            System.out.println(response.body().checkoutUrl);
+            ChargilyResponse response = client.submitInvoice(invoice);
+            if (response.isSuccess()) {
+                response.getStatusCode();
+                response.getCheckoutUrl();
+            } else {
+                response.getStatusCode();
+                response.getErrorBody();
+            }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -64,20 +70,27 @@ class ChargilyApp {
                 "5001",
                 10000.0);
 
-        Callback<ChargilyResponse> responseCallback = new Callback<>() {
+        ChargilyCallback<ChargilyResponse> responseCallback = new ChargilyCallback<>() {
 
             @Override
-            public void onResponse(@Nonnull Call call, Response response) {
+            public void onResponse(@Nonnull Call<ChargilyResponse> call, ChargilyResponse response) {
                 // do something on response
+                if (response.isSuccess()) {
+                    response.getStatusCode();
+                    response.getCheckoutUrl();
+                } else {
+                    response.getStatusCode();
+                    response.getErrorBody();
+                }
             }
 
             @Override
-            public void onFailure(@Nonnull Call call, @Nonnull Throwable t) {
+            public void onFailure(@Nonnull Call<ChargilyResponse> call, @Nonnull Throwable t) {
                 // do something on failure
             }
         };
 
-        client.createInvoiceAsync(invoice, responseCallback);
+        client.submitInvoiceAsync(invoice, responseCallback);
     }
 }
 ```
