@@ -4,8 +4,6 @@ import br.com.fluentvalidator.exception.ValidationException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -16,9 +14,9 @@ import static org.awaitility.Awaitility.await;
 
 class ChargilyClientTest {
 
+    public final int HTTP_STATUS_UNAUTHORIZED = 401;
     private static ChargilyClient chargilyClient;
     private boolean isResponse = false;
-    private int responseStatusCode = 0;
     private final int HTTP_STATUS_CREATED = 201;
     private ChargilyResponse chargilyResponse;
     private final String CHARGILY_CHECKOUT_URL = "https://epay.chargily.com.dz/checkout/";
@@ -29,18 +27,19 @@ class ChargilyClientTest {
     }
 
     @Test
-    void should_create_invoice_and_return_chargily_response() throws IOException {
+    void should_submit_invoice_and_return_chargily_response_is_true() throws IOException {
         // Given
         Invoice invoice = getInvoice();
 
         // When
-        Response<ChargilyResponse> response = chargilyClient.createInvoice(invoice);
+        ChargilyResponse chargilyResponse = chargilyClient.submitInvoice(invoice);
 
         // Then
-        assertThat(response).isNotNull();
-        assertThat(response.body()).isNotNull();
-        assertThat(response.code()).isEqualTo(HTTP_STATUS_CREATED);
-        assertThat(response.body().getCheckoutUrl()).contains(CHARGILY_CHECKOUT_URL);
+        assertThat(chargilyResponse).isNotNull();
+        assertThat(chargilyResponse.isSuccess()).isTrue();
+        assertThat(chargilyResponse.getStatusCode()).isEqualTo(HTTP_STATUS_CREATED);
+        assertThat(chargilyResponse.getCheckoutUrl()).contains(CHARGILY_CHECKOUT_URL);
+        assertThat(chargilyResponse.getErrorBody()).isNull();
     }
 
     @Test
@@ -51,37 +50,87 @@ class ChargilyClientTest {
 
         // When, Then
         assertThatExceptionOfType(ValidationException.class)
-                .isThrownBy(() -> chargilyClient.createInvoice(invoice))
+                .isThrownBy(() -> chargilyClient.submitInvoice(invoice))
                 .withMessageContaining("client name cannot be null or empty");
 
     }
 
     @Test
-    void should_create_invoice_async_and_get_chargily_response() {
+    void should_submit_invoice_and_return_chargily_response_is_false() throws IOException {
+        // Given
+        Invoice invoice = getInvoice();
+        ChargilyClient fakeChargilyClient = new ChargilyClient("api_KFWtdBczv0qnAMHNxGXCGVK93yEAahZwr4EgFa4xmfnLTIJkezPvW0LgqholrC7S");
+        // When
+        ChargilyResponse chargilyResponse = fakeChargilyClient.submitInvoice(invoice);
+
+        // Then
+        assertThat(chargilyResponse).isNotNull();
+        assertThat(chargilyResponse.isSuccess()).isFalse();
+        assertThat(chargilyResponse.getStatusCode()).isEqualTo(HTTP_STATUS_UNAUTHORIZED);
+        assertThat(chargilyResponse.getCheckoutUrl()).isNull();
+        assertThat(chargilyResponse.getErrorBody()).contains(
+                """
+                        {"errors":[{"message":"Unauthorized"}]}""");
+    }
+
+    @Test
+    void should_submit_invoice_async_and_get_chargily_response_is_true() {
         // Given
         Invoice invoice = getInvoice();
 
-        Callback<ChargilyResponse> responseCallback = new Callback<>() {
+        ChargilyCallback<ChargilyResponse> responseCallback = new ChargilyCallback<>() {
 
             @Override
-            public void onResponse(@Nonnull Call call, Response response) {
+            public void onResponse(@Nonnull Call<ChargilyResponse> call, ChargilyResponse response) {
+                chargilyResponse = response;
                 isResponse = true;
-                responseStatusCode = response.code();
-                chargilyResponse = (ChargilyResponse) response.body();
             }
 
             @Override
-            public void onFailure(@Nonnull Call call, @Nonnull Throwable t) {
+            public void onFailure(@Nonnull Call<ChargilyResponse> call, @Nonnull Throwable t) {
             }
         };
 
         // When
-        chargilyClient.createInvoiceAsync(invoice, responseCallback);
+        chargilyClient.submitInvoiceAsync(invoice, responseCallback);
 
         // Then
         await().until(() -> isResponse);
-        assertThat(responseStatusCode).isEqualTo(HTTP_STATUS_CREATED);
+        assertThat(chargilyResponse.isSuccess()).isTrue();
+        assertThat(chargilyResponse.getStatusCode()).isEqualTo(HTTP_STATUS_CREATED);
         assertThat(chargilyResponse.getCheckoutUrl()).contains(CHARGILY_CHECKOUT_URL);
+    }
+
+    @Test
+    void should_submit_invoice_async_and_get_chargily_response_is_false() {
+        // Given
+        Invoice invoice = getInvoice();
+        ChargilyClient fakeChargilyClient = new ChargilyClient("api_KFWtdBczv0qnAMHNxGXCGVK93yEAahZwr4EgFa4xmfnLTIJkezPvW0LgqholrC7S");
+
+        ChargilyCallback<ChargilyResponse> responseCallback = new ChargilyCallback<>() {
+
+            @Override
+            public void onResponse(@Nonnull Call<ChargilyResponse> call, ChargilyResponse response) {
+                chargilyResponse = response;
+                isResponse = true;
+            }
+
+            @Override
+            public void onFailure(@Nonnull Call<ChargilyResponse> call, @Nonnull Throwable t) {
+            }
+        };
+
+        // When
+        fakeChargilyClient.submitInvoiceAsync(invoice, responseCallback);
+
+        // Then
+        await().until(() -> isResponse);
+        assertThat(chargilyResponse.isSuccess()).isFalse();
+        assertThat(chargilyResponse.getStatusCode()).isEqualTo(HTTP_STATUS_UNAUTHORIZED);
+        assertThat(chargilyResponse.getCheckoutUrl()).isNull();
+        assertThat(chargilyResponse.getErrorBody()).contains(
+                """
+                        {"errors":[{"message":"Unauthorized"}]}""");
     }
 
     @Test
@@ -92,7 +141,7 @@ class ChargilyClientTest {
 
         // When, Then
         assertThatExceptionOfType(ValidationException.class)
-                .isThrownBy(() -> chargilyClient.createInvoiceAsync(invoice, null))
+                .isThrownBy(() -> chargilyClient.submitInvoiceAsync(invoice, null))
                 .withMessageContaining("invoice amount cannot be less than 75.0");
     }
 

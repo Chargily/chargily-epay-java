@@ -1,6 +1,8 @@
 package chargily.epay.java;
 
+import br.com.fluentvalidator.context.ValidationResult;
 import br.com.fluentvalidator.exception.ValidationException;
+import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -28,8 +30,10 @@ public class ChargilyClient {
      * @return ChargilyResponse that contains checkoutUrl.
      * @throws IOException         if a problem occurred talking to the server.
      * @throws ValidationException if the invoice object is not valid.
-     * @see #createInvoiceAsync(Invoice, Callback) createInvoiceAsync
+     * @see #submitInvoiceAsync(Invoice, ChargilyCallback) submitInvoiceAsync
+     * @deprecated Use {@link #submitInvoice(Invoice)} instead. This method will be removed in future versions.
      */
+    @Deprecated(since = "1.1", forRemoval = true)
     public Response<ChargilyResponse> createInvoice(Invoice invoice) throws IOException, ValidationException {
         var validations = new InvoiceValidator().validate(invoice);
         if (!validations.isValid())
@@ -38,18 +42,58 @@ public class ChargilyClient {
     }
 
     /**
-     * Create invoice asynchronously
+     * Submits an invoice synchronously to the Chargily API and retrieves a ChargilyResponse containing the checkout URL.
      *
-     * @param invoice  Invoice information to be sent to Chargily API.
-     * @param callback Retrofit Callback object with OnResponse and OnFailure.
+     * @param invoice Invoice information to be sent to the Chargily API.
+     * @return ChargilyResponse containing the checkout URL.
      * @throws ValidationException if the invoice object is not valid.
-     * @see #createInvoice(Invoice) createInvoice
+     * @throws IOException         if a problem occurred talking to the server.
+     * @see #submitInvoiceAsync(Invoice, ChargilyCallback) submitInvoiceAsync
      */
-    public void createInvoiceAsync(Invoice invoice, Callback<ChargilyResponse> callback) throws ValidationException {
-        var validations = new InvoiceValidator().validate(invoice);
+    public ChargilyResponse submitInvoice(Invoice invoice) throws ValidationException, IOException {
+        ValidationResult validations = new InvoiceValidator().validate(invoice);
+        if (!validations.isValid()) {
+            throw new InvoiceException(validations);
+        }
+        Response<ChargilyResponse> response = chargilyApi.createInvoice(apiKey, invoice).execute();
+        if (!response.isSuccessful()) {
+            return new ChargilyResponse(false, response.code(), null, response.errorBody().string());
+        }
+        return new ChargilyResponse(true, response.code(), response.body().getCheckoutUrl(), null);
+    }
+
+    /**
+     * Submits an invoice asynchronously to the Chargily API and provides a custom callback for handling responses and errors.
+     *
+     * @param invoice  Invoice information to be sent to the Chargily API.
+     * @param callback Chargily Callback object with OnResponse and OnFailure methods. The callback
+     *                 will receive a {@link ChargilyResponse} object.
+     * @throws ValidationException if the invoice object is not valid.
+     * @see #submitInvoice(Invoice) submitInvoice
+     */
+    public void submitInvoiceAsync(Invoice invoice, ChargilyCallback<ChargilyResponse> callback) throws ValidationException {
+        ValidationResult validations = new InvoiceValidator().validate(invoice);
         if (!validations.isValid())
             throw new InvoiceException(validations);
-        chargilyApi.createInvoice(apiKey, invoice).enqueue(callback);
+        chargilyApi.createInvoice(apiKey, invoice).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(Call<ChargilyResponse> call, Response<ChargilyResponse> response) {
+                if (response.isSuccessful()) {
+                    callback.onResponse(call, new ChargilyResponse(true, response.code(), response.body().getCheckoutUrl(), null));
+                } else {
+                    try {
+                        callback.onResponse(call, new ChargilyResponse(false, response.code(), null, response.errorBody().string()));
+                    } catch (IOException e) {
+                        callback.onFailure(call, e);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ChargilyResponse> call, Throwable t) {
+                callback.onFailure(call, t);
+            }
+        });
     }
 
 }
