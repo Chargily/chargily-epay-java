@@ -1,7 +1,6 @@
 package chargily.epay.java;
 
 import br.com.fluentvalidator.context.ValidationResult;
-import br.com.fluentvalidator.exception.ValidationException;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -28,13 +27,13 @@ public class ChargilyClient {
      *
      * @param invoice Invoice information to be sent to Chargily API.
      * @return ChargilyResponse that contains checkoutUrl.
-     * @throws IOException         if a problem occurred talking to the server.
-     * @throws ValidationException if the invoice object is not valid.
+     * @throws IOException      if a problem occurred talking to the server.
+     * @throws InvoiceException if the invoice object is not valid.
      * @see #submitInvoiceAsync(Invoice, ChargilyCallback) submitInvoiceAsync
      * @deprecated Use {@link #submitInvoice(Invoice)} instead. This method will be removed in future versions.
      */
     @Deprecated(since = "1.1", forRemoval = true)
-    public Response<ChargilyResponse> createInvoice(Invoice invoice) throws IOException, ValidationException {
+    public Response<ChargilyResponse> createInvoice(Invoice invoice) throws IOException, InvoiceException {
         var validations = new InvoiceValidator().validate(invoice);
         if (!validations.isValid())
             throw new InvoiceException(validations);
@@ -46,11 +45,11 @@ public class ChargilyClient {
      *
      * @param invoice Invoice information to be sent to the Chargily API.
      * @return ChargilyResponse containing the checkout URL.
-     * @throws ValidationException if the invoice object is not valid.
-     * @throws IOException         if a problem occurred talking to the server.
+     * @throws InvoiceException if the invoice object is not valid.
+     * @throws IOException      if a problem occurred talking to the server.
      * @see #submitInvoiceAsync(Invoice, ChargilyCallback) submitInvoiceAsync
      */
-    public ChargilyResponse submitInvoice(Invoice invoice) throws ValidationException, IOException {
+    public ChargilyResponse submitInvoice(Invoice invoice) throws InvoiceException, IOException {
         ValidationResult validations = new InvoiceValidator().validate(invoice);
         if (!validations.isValid()) {
             throw new InvoiceException(validations);
@@ -68,10 +67,10 @@ public class ChargilyClient {
      * @param invoice  Invoice information to be sent to the Chargily API.
      * @param callback Chargily Callback object with OnResponse and OnFailure methods. The callback
      *                 will receive a {@link ChargilyResponse} object.
-     * @throws ValidationException if the invoice object is not valid.
+     * @throws InvoiceException if the invoice object is not valid.
      * @see #submitInvoice(Invoice) submitInvoice
      */
-    public void submitInvoiceAsync(Invoice invoice, ChargilyCallback<ChargilyResponse> callback) throws ValidationException {
+    public void submitInvoiceAsync(Invoice invoice, ChargilyCallback<ChargilyResponse> callback) throws InvoiceException {
         ValidationResult validations = new InvoiceValidator().validate(invoice);
         if (!validations.isValid())
             throw new InvoiceException(validations);

@@ -1,6 +1,5 @@
 package chargily.epay.java;
 
-import br.com.fluentvalidator.exception.ValidationException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import retrofit2.Call;
@@ -49,7 +48,7 @@ class ChargilyClientTest {
         invoice.setClientName(null);
 
         // When, Then
-        assertThatExceptionOfType(ValidationException.class)
+        assertThatExceptionOfType(InvoiceException.class)
                 .isThrownBy(() -> chargilyClient.submitInvoice(invoice))
                 .withMessageContaining("client name cannot be null or empty");
 
@@ -140,7 +139,7 @@ class ChargilyClientTest {
         invoice.setAmount(null);
 
         // When, Then
-        assertThatExceptionOfType(ValidationException.class)
+        assertThatExceptionOfType(InvoiceException.class)
                 .isThrownBy(() -> chargilyClient.submitInvoiceAsync(invoice, null))
                 .withMessageContaining("invoice amount cannot be less than 75.0");
     }
