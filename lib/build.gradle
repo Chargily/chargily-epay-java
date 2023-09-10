@@ -37,11 +37,11 @@ dependencies {
 
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     api 'org.apache.commons:commons-math3:3.6.1'
+    api 'com.squareup.retrofit2:retrofit:2.9.0'
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'com.google.guava:guava:31.0.1-jre'
     implementation 'com.github.mvallim:java-fluent-validator:1.10.0'
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'com.google.code.gson:gson:2.9.0'
     testImplementation 'org.awaitility:awaitility:4.2.0'
